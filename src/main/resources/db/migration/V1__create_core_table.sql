@@ -1,3 +1,5 @@
+-- Flyway V1 migration created by Keerthana YN
+
 CREATE TABLE risk (
 
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
