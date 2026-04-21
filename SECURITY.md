@@ -3,6 +3,8 @@
 **Role:** AI Developer 3
 **Project:** Risk Treatment Planner
 
+## Day 1:
+
 Here are the 5 main OWASP Top 10 risks for our project and how we are going to fix them:
 
 ### 1. Broken Access Control
@@ -24,3 +26,39 @@ Here are the 5 main OWASP Top 10 risks for our project and how we are going to f
 ### 5. API Rate Limit Abuse (Denial of Service)
 **Attack Scenario:** A user writes a basic while-loop script to spam our `/describe` endpoint thousands of times to crash the Flask server and use up our Groq free tier.
 **Mitigation:** I am adding `flask-limiter` to the Python service. I will set it to block IPs if they do more than 30 requests a minute globally, and 10 requests a minute for the heavy AI routes. Spammers will just get a 429 Too Many Requests error.
+
+---
+---
+
+---
+
+## Day 2: Tool-Specific Security Threats
+
+As per the day 2 task, I have identified 5 threats specific to the Risk Treatment Planner:
+
+### 1. AI Output Manipulation (Hallucinations)
+* **Attack Vector:** An attacker provides confusing or conflicting risk data to trick the Groq model into generating false treatment advice.
+* **Damage Potential:** Business owners could make wrong decisions based on "hallucinated" AI data, leading to real-world financial or safety risks.
+* **Mitigation Plan:** We will add a "confidence score" to the AI response meta-object so users know how reliable the advice is.
+
+### 2. Sensitive Data Exposure in AI Prompts
+* **Attack Vector:** A developer or user accidentally includes PII (Personally Identifiable Information) in the prompt templates sent to the Groq API.
+* **Damage Potential:** Sensitive user or business data could be stored in Groq’s logs or used to train public models, violating privacy.
+* **Mitigation Plan:** I will perform a PII audit on all prompts and ensure the Flask service strips any personal data before the API call.
+
+### 3. Vector Database Poisoning (ChromaDB)
+* **Attack Vector:** A user with upload access pushes a malicious PDF or text file into the RAG pipeline.
+* **Damage Potential:** The AI will start giving dangerous advice because the ChromaDB context it retrieves is corrupted with bad info.
+* **Mitigation Plan:** I will implement a sanitization check for all files being ingested into the ChromaDB RAG pipeline.
+
+### 4. JWT Replay Attacks
+* **Attack Vector:** An attacker steals a JWT token from a user's browser or network and reuses it to access the Risk Planner.
+* **Damage Potential:** Full unauthorized access to risk reports and treatment plans belonging to other managers.
+* **Mitigation Plan:** We will use short-lived JWT tokens and implement a Redis-based blacklist to handle secure logouts.
+
+### 5. Insecure Error Handling in AI Microservice
+* **Attack Vector:** When the Groq API is down or times out, the Flask app crashes and returns a detailed Python traceback to the user.
+* **Damage Potential:** Attackers can see our internal file structure and the exact logic of our groq_client.py.
+* **Mitigation Plan:** All AI calls will be wrapped in try-except blocks that return a pre-written "Fallback" template instead of a raw error.
+
+---
