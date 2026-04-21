@@ -1,7 +1,5 @@
-.env
-__pycache__/
-*.pyc
-chroma_data/
-node_modules/
+env
 target/
-*.class
+node_modules/
+__pycache__/
+chroma_data/
