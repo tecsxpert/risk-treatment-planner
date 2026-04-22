@@ -1,6 +1,7 @@
 package com.risk.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 @Entity
@@ -11,18 +12,27 @@ public class Risk {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Title is required")
     @Column(nullable = false)
     private String title;
 
     private String description;
 
+    @NotBlank(message = "Risk level is required")
     @Column(name = "risk_level", nullable = false)
     private String riskLevel;
 
+    @NotBlank(message = "Status is required")
     private String status;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    // Automatically set createdAt before saving
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
 
     // Getters and Setters
     public Long getId() {
