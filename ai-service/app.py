@@ -1,28 +1,15 @@
-from flask import Flask, jsonify
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
+from flask import Flask
+from middleware import sanitize_input
 
 app = Flask(__name__)
 
-# Register blueprints
-from routes.describe import describe_bp
-from routes.recommend import recommend_bp
-from routes.query import query_bp
-from routes.report import report_bp
-app.register_blueprint(describe_bp)
-app.register_blueprint(recommend_bp)
-app.register_blueprint(query_bp)
-app.register_blueprint(report_bp)
+# This runs the middleware before every single request
+app.before_request(sanitize_input)
 
-@app.route('/health', methods=['GET'])
-def health():
-    return jsonify({
-        "status": "ok",
-        "service": "ai-service",
-        "model": "llama-3.3-70b-versatile"
-    }), 200
+# Just a dummy route to test it
+@app.route('/describe', methods=['POST'])
+def describe():
+    return {"message": "Success! Your input was safe."}
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=False)
+if __name__ == "__main__":
+    app.run(port=5000, debug=False)
