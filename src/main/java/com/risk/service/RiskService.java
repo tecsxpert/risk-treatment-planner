@@ -3,6 +3,9 @@ package com.risk.service;
 import com.risk.entity.Risk;
 import com.risk.repository.RiskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -37,6 +40,19 @@ public class RiskService {
             return true;
         }
         return false;
+    }
+
+    // ✅ GET paginated with sort
+    public Page<Risk> getAllPaginated(int page, int size, String sortBy, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+        return riskRepository.findAll(PageRequest.of(page, size, sort));
+    }
+
+    // ✅ GET all for CSV export
+    public List<Risk> getAllForExport() {
+        return riskRepository.findAll();
     }
 
     // ✅ READ methods for scheduler
