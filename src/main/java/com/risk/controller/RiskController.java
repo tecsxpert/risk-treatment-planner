@@ -2,6 +2,7 @@ package com.risk.controller;
 
 import com.risk.entity.Risk;
 import com.risk.repository.RiskRepository;
+import com.risk.service.RiskService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,7 +20,10 @@ public class RiskController {
     @Autowired
     private RiskRepository riskRepository;
 
-    // ✅ GET /all — any logged in user can view
+    @Autowired
+    private RiskService riskService;
+
+    // ✅ GET /all — any logged in user
     @GetMapping("/all")
     public ResponseEntity<Page<Risk>> getAllRisks(
             @RequestParam(defaultValue = "0") int page,
@@ -28,47 +32,38 @@ public class RiskController {
         return ResponseEntity.ok(risks);
     }
 
-    // ✅ GET /{id} — any logged in user can view
+    // ✅ GET /{id} — any logged in user
     @GetMapping("/{id}")
     public ResponseEntity<Risk> getRiskById(@PathVariable Long id) {
         Optional<Risk> risk = riskRepository.findById(id);
-        if (risk.isPresent()) {
-            return ResponseEntity.ok(risk.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return risk.map(ResponseEntity::ok)
+                   .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ POST /create — only ADMIN and MANAGER
+    // ✅ POST /create — ADMIN and MANAGER only — audit logged
     @PostMapping("/create")
     @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     public ResponseEntity<Risk> createRisk(@Valid @RequestBody Risk risk) {
-        Risk savedRisk = riskRepository.save(risk);
-        return ResponseEntity.status(201).body(savedRisk);
+        Risk saved = riskService.create(risk);
+        return ResponseEntity.status(201).body(saved);
     }
 
-    // ✅ PUT /{id} — only ADMIN and MANAGER
+    // ✅ PUT /{id} — ADMIN and MANAGER only — audit logged
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     public ResponseEntity<Risk> updateRisk(@PathVariable Long id,
                                             @RequestBody Risk updatedRisk) {
-        return riskRepository.findById(id).map(risk -> {
-            risk.setTitle(updatedRisk.getTitle());
-            risk.setDescription(updatedRisk.getDescription());
-            
-            risk.setStatus(updatedRisk.getStatus());
-            
-            riskRepository.save(risk);
-            return ResponseEntity.ok(risk);
-        }).orElse(ResponseEntity.notFound().build());
+        Optional<Risk> result = riskService.update(id, updatedRisk);
+        return result.map(ResponseEntity::ok)
+                     .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ DELETE /{id} — only ADMIN
+    // ✅ DELETE /{id} — ADMIN only — audit logged
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteRisk(@PathVariable Long id) {
-        if (riskRepository.existsById(id)) {
-            riskRepository.deleteById(id);
+        boolean deleted = riskService.delete(id);
+        if (deleted) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
