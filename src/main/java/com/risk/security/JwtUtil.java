@@ -11,16 +11,16 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    // ✅ Use secure key (IMPORTANT FIX)
     private final SecretKey SECRET_KEY =
             Keys.hmacShaKeyFor("mysecretkeymysecretkeymysecretkey12".getBytes());
 
-    // ✅ Generate Token
-    public String generateToken(String username) {
+    // ✅ Generate Token WITH role inside
+    public String generateToken(String username, String role) {
         return Jwts.builder()
                 .subject(username)
+                .claim("role", role)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hour
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
                 .signWith(SECRET_KEY)
                 .compact();
     }
@@ -30,7 +30,12 @@ public class JwtUtil {
         return extractClaims(token).getSubject();
     }
 
-    // ✅ Validate token (optional but good practice)
+    // ✅ Extract Role
+    public String extractRole(String token) {
+        return extractClaims(token).get("role", String.class);
+    }
+
+    // ✅ Validate token
     public boolean isTokenValid(String token) {
         try {
             extractClaims(token);
@@ -43,7 +48,7 @@ public class JwtUtil {
     // ✅ Extract all claims
     private Claims extractClaims(String token) {
         return Jwts.parser()
-                .verifyWith(SECRET_KEY)   // ✅ NEW API
+                .verifyWith(SECRET_KEY)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();

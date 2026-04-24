@@ -55,7 +55,7 @@ public class AuthController {
             return ResponseEntity.status(401).body("Invalid password");
         }
 
-        String token = jwtUtil.generateToken(user.getUsername());
+        String token = jwtUtil.generateToken(user.getUsername(), user.getRole());
 
         return ResponseEntity.ok(Map.of("token", token));
     }
@@ -71,7 +71,7 @@ public class AuthController {
         String token = header.substring(7);
         String username = jwtUtil.extractUsername(token);
 
-        String newToken = jwtUtil.generateToken(username);
+        String newToken = jwtUtil.generateToken(username, "VIEWER");
 
         return ResponseEntity.ok(Map.of("token", newToken));
     }

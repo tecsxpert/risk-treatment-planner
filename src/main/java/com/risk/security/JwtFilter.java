@@ -23,13 +23,13 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                   HttpServletResponse response,
-                                   FilterChain filterChain)
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
             throws ServletException, IOException {
 
         String path = request.getServletPath();
 
-        // ✅ 1. Skip authentication for auth endpoints
+        // ✅ Skip auth endpoints
         if (path.startsWith("/auth")) {
             filterChain.doFilter(request, response);
             return;
@@ -37,35 +37,30 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String header = request.getHeader("Authorization");
 
-        // ✅ 2. Check token exists
         if (header != null && header.startsWith("Bearer ")) {
-
             String token = header.substring(7);
-
             try {
                 String username = jwtUtil.extractUsername(token);
+                String role = jwtUtil.extractRole(token);
 
-                // ✅ 3. Validate and set authentication
                 if (username != null &&
                         SecurityContextHolder.getContext().getAuthentication() == null &&
                         jwtUtil.isTokenValid(token)) {
 
+                    // ✅ Set ROLE_ADMIN or ROLE_MANAGER or ROLE_VIEWER from token
                     UsernamePasswordAuthenticationToken auth =
                             new UsernamePasswordAuthenticationToken(
                                     username,
                                     null,
-                                    List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                                    List.of(new SimpleGrantedAuthority("ROLE_" + role))
                             );
-
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
-
             } catch (Exception e) {
-                System.out.println("❌ Invalid or Expired JWT Token");
+                System.out.println("JWT Error: " + e.getMessage());
             }
         }
 
-        // ✅ 4. Continue filter chain
         filterChain.doFilter(request, response);
     }
 }
