@@ -10,36 +10,11 @@ with open("prompts/describe_prompt.txt", "r") as f:
     prompt_template = f.read()
 
 test_inputs = [
-    {
-        "risk_title": "Data Breach",
-        "risk_category": "Cybersecurity",
-        "likelihood": "High",
-        "impact": "Critical"
-    },
-    {
-        "risk_title": "Server Downtime",
-        "risk_category": "Infrastructure",
-        "likelihood": "Medium",
-        "impact": "High"
-    },
-    {
-        "risk_title": "Employee Data Theft",
-        "risk_category": "Internal Security",
-        "likelihood": "Low",
-        "impact": "High"
-    },
-    {
-        "risk_title": "Third Party Vendor Failure",
-        "risk_category": "Operational",
-        "likelihood": "Medium",
-        "impact": "Medium"
-    },
-    {
-        "risk_title": "Regulatory Non-Compliance",
-        "risk_category": "Legal",
-        "likelihood": "Low",
-        "impact": "Critical"
-    }
+    {"risk_title": "Data Breach", "risk_category": "Cybersecurity", "likelihood": "High", "impact": "Critical"},
+    {"risk_title": "Server Downtime", "risk_category": "Infrastructure", "likelihood": "Medium", "impact": "High"},
+    {"risk_title": "Employee Data Theft", "risk_category": "Internal Security", "likelihood": "Low", "impact": "High"},
+    {"risk_title": "Third Party Vendor Failure", "risk_category": "Operational", "likelihood": "Medium", "impact": "Medium"},
+    {"risk_title": "Regulatory Non-Compliance", "risk_category": "Legal", "likelihood": "Low", "impact": "Critical"}
 ]
 
 for i, test in enumerate(test_inputs):
