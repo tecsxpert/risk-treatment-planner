@@ -20,6 +20,10 @@ public class ExampleEntityService {
         this.repository = repository;
     }
 
+    public org.springframework.data.domain.Page<ExampleEntity> getAllPaginated(org.springframework.data.domain.Pageable pageable) {
+        return repository.findAll(pageable);
+    }
+
     public List<ExampleEntity> getAll() {
         return repository.findAll();
     }
