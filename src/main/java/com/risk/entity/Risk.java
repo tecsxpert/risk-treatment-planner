@@ -1,11 +1,12 @@
 package com.risk.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "risks")
+@Table(name = "risk")
 public class Risk {
 
     @Id
