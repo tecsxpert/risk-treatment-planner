@@ -1,28 +1,41 @@
 from flask import Flask, jsonify
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from middleware import sanitize_input
 
 app = Flask(__name__)
 
-# Register blueprints
-from routes.describe import describe_bp
-from routes.recommend import recommend_bp
-from routes.query import query_bp
-from routes.report import report_bp
-app.register_blueprint(describe_bp)
-app.register_blueprint(recommend_bp)
-app.register_blueprint(query_bp)
-app.register_blueprint(report_bp)
+# setting up rate limiter to stop people from spamming the api
+# default limit for the whole app is 30 requests a minute
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["30 per minute"],
+    storage_uri="memory://",
+)
 
-@app.route('/health', methods=['GET'])
-def health():
+# this runs the bouncer function to clean the input text
+app.before_request(sanitize_input)
+
+# simple route to check if input is safe
+@app.route('/describe', methods=['POST'])
+def describe():
+    return {"message": "Success! Your input was safe."}
+
+# specific route for reports with a stricter limit of 10 per minute
+@app.route('/generate-report', methods=['POST'])
+@limiter.limit("10 per minute")
+def generate_report():
+    return jsonify({"message": "Report generation started!"})
+
+# returns a 429 error message with retry_after if someone hits the rate limit
+@app.errorhandler(429)
+def ratelimit_handler(e):
     return jsonify({
-        "status": "ok",
-        "service": "ai-service",
-        "model": "llama-3.3-70b-versatile"
-    }), 200
+        "error": "Too Many Requests",
+        "message": "Slow down! You hit the rate limit.",
+        "retry_after": 60
+    }), 429
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=False)
+if __name__ == "__main__":
+    app.run(port=5000, debug=False)
