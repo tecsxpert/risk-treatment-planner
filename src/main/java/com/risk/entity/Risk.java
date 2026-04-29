@@ -2,7 +2,6 @@ package com.risk.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.Data;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -38,7 +37,7 @@ public class Risk {
 
     private String status;
 
-    // FIX FOR P2 BUG: Prevents dates in the past
+    // Prevents dates in the past
     @FutureOrPresent(message = "Due date cannot be in the past")
     @Column(name = "due_date")
     private LocalDate dueDate;
