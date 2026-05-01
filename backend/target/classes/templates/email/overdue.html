@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Entity Overdue</title>
+</head>
+<body>
+    <h2>Entity Overdue Notification</h2>
+    <p>Hello,</p>
+    <p>The following entity is overdue:</p>
+    <ul>
+        <li><strong>Name:</strong> <span th:text="${name}"></span></li>
+        <li><strong>Description:</strong> <span th:text="${description}"></span></li>
+        <li><strong>Due Date:</strong> <span th:text="${dueDate}"></span></li>
+    </ul>
+    <p>Please take the necessary action.</p>
+</body>
+</html>
