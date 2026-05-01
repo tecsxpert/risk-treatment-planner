@@ -6,7 +6,7 @@ import com.internship.tool.exception.EntityNotFoundException;
 import com.internship.tool.exception.InvalidInputException;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.internship.tool.service.email.EmailService;
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,6 @@ public class ExampleEntityService {
     private final ExampleEntityRepository repository;
     private final EmailService emailService;
 
-    @Autowired
     @Autowired
     public ExampleEntityService(ExampleEntityRepository repository, EmailService emailService) {
         this.repository = repository;
