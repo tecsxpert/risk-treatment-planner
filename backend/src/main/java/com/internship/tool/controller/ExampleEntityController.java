@@ -1,7 +1,6 @@
 package com.internship.tool.controller;
 
 import com.internship.tool.entity.ExampleEntity;
-import com.internship.tool.exception.EntityNotFoundException;
 import com.internship.tool.service.ExampleEntityService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -35,12 +33,8 @@ public class ExampleEntityController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ExampleEntity> getById(@PathVariable Long id) {
-        try {
-            ExampleEntity entity = service.getById(id);
-            return ResponseEntity.ok(entity);
-        } catch (EntityNotFoundException ex) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage());
-        }
+        ExampleEntity entity = service.getById(id);
+        return ResponseEntity.ok(entity);
     }
 
     @PostMapping("/create")
