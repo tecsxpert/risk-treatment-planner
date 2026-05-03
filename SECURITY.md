@@ -163,3 +163,22 @@ The zero-alert result confirms that the following protections are working:
 
 ### 3. Final Conclusion
 The AI Service has passed the active vulnerability assessment. No high or medium-risk issues were found.
+
+---
+
+## Day 12: Production-Grade Header Hardening
+
+Successfully replaced manual security headers with the `flask-talisman` library to standardize the API's security posture.
+
+### 1. Implementation Detail
+*   **Tooling:** Integrated `flask-talisman` to manage Content Security Policy (CSP) and transport security.
+*   **Status:** Manual `@app.after_request` logic removed in favor of professional middleware.
+
+### 2. Final Verification
+*   **OWASP ZAP Re-scan:** Completed on May 3, 2026.
+*   **Critical Findings:** 0
+*   **High Findings:** 0
+*   **Result:** All security headers are correctly identified and verified by the scanner.
+
+### 3. Conclusion
+The API is now using industry-standard protection against common web vulnerabilities.
