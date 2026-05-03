@@ -182,3 +182,23 @@ Successfully replaced manual security headers with the `flask-talisman` library 
 
 ### 3. Conclusion
 The API is now using industry-standard protection against common web vulnerabilities.
+
+---
+
+## Day 13: Full Stack Security Verification
+Performed manual end-to-end testing via Postman to verify API response codes for unauthorized and malicious traffic.
+
+### 1. Authentication & Authorization Test
+* **401 Unauthorized:** Sent request to `/generate-report` without an Authorization header. Verified 401 response with "Authentication token missing" message.
+* **403 Forbidden:** Sent request with an invalid token. Verified 403 response with "Admin privileges required" message.
+
+### 2. Input Sanitization (XSS) Test
+* **XSS Injection:** Sent `<script>alert('XSS')</script>` in the input field to the `/describe` route.
+* **Result:** Middleware successfully sanitized the tags. Verified 200 OK response with "Success! Your input was safe" message.
+
+### 3. Rate Limiting Test
+* **429 Too Many Requests:** Sent 6 consecutive requests to the protected report route within one minute.
+* **Result:** The 6th request was correctly blocked. Verified 429 response with "Slow down!" message and retry_after header.
+
+### Final Security Status: VERIFIED
+The API is now hardened with automated headers, multi-layer input sanitization, role-based access control, and traffic rate limiting.
