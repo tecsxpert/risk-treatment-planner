@@ -202,3 +202,46 @@ Performed manual end-to-end testing via Postman to verify API response codes for
 
 ### Final Security Status: VERIFIED
 The API is now hardened with automated headers, multi-layer input sanitization, role-based access control, and traffic rate limiting.
+
+---
+
+## DAY 14
+# Final Security Assessment: Risk Treatment Planner
+
+## 1. Executive Summary
+The Risk Treatment Planner API has undergone a comprehensive 7-day security hardening phase. The project transitioned from a baseline development state with multiple vulnerabilities to a production-ready "Hardened" state. Key implementations include automated security header management via `flask-talisman`, multi-layer input sanitization, and Role-Based Access Control (RBAC). As of Day 14, all critical and high-risk vulnerabilities identified by OWASP ZAP and manual audits have been remediated.
+
+## 2. Threat Landscape
+The following threats were identified and addressed during the security sprint:
+* **Injection Attacks:** XSS (Cross-Site Scripting), SQL Injection, and AI Prompt Injection.
+* **Broken Authentication:** Unauthorized access to sensitive report generation routes.
+* **Exposure of PII:** Accidental logging or processing of personally identifiable information (emails).
+* **Resource Exhaustion:** Potential DDoS or API abuse through unlimited requests.
+* **Information Leakage:** Server version and technical stack exposure via HTTP headers.
+
+## 3. Tests Conducted
+* **Automated Scans:** Multiple OWASP ZAP Active Scans (Baseline vs. Hardened).
+* **PII Audit:** Manual code review of `app.py` and `middleware.py` for data leakage.
+* **Manual Verification (Postman):** 
+    * 401 Unauthorized (Missing Token)
+    * 403 Forbidden (Role Mismatch)
+    * 429 Too Many Requests (Rate Limit Trigger)
+    * Payload Sanitization (XSS and SQLi strings)
+
+## 4. Findings & Remediations
+| Finding | Risk Level | Fix Implemented |
+| :--- | :--- | :--- |
+| Missing Security Headers | High | Integrated `flask-talisman` for CSP, HSTS, and XSS protection. |
+| Server Version Exposure | Low | Implemented `CustomRequestHandler` to mask Flask/Werkzeug signatures. |
+| Unrestricted API Access | Critical | Developed `@require_auth` decorator with role-based checks. |
+| Input Vulnerability | High | Implemented `bleach` sanitization and regex-based PII filtering. |
+| No Rate Limiting | Medium | Integrated `flask-limiter` on high-resource endpoints. |
+
+## 5. Residual Risks
+* **Zero-Day Vulnerabilities:** Risks associated with underlying dependencies (Flask, Bleach) are mitigated through regular package updates.
+* **Token Storage:** Security of the client-side token storage is outside the API's scope but remains a known risk for the front-end implementation.
+
+## 6. Team Sign-off
+**Developer:** Akhil M (Final Year CSE-AIML, DBIT)
+**Status:** PRODUCTION READY
+**Date:** May 4, 2026
