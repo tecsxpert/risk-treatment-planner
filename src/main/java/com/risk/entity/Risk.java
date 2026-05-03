@@ -1,50 +1,78 @@
 package com.risk.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import lombok.Data;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "risk")
+@Schema(
+        description = "Risk register entry; used as JSON body for create/update and in paginated list responses.",
+        example = """
+                {
+                  "title": "Legacy VPN reliance",
+                  "description": "Remote access depends on end-of-life VPN appliance.",
+                  "category": "Operational",
+                  "likelihood": 4,
+                  "impact": 5,
+                  "status": "Open",
+                  "dueDate": "2026-06-30"
+                }
+                """
+)
 public class Risk {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "Database id (omit or null on create)", example = "42")
     private Long id;
 
     @Column(nullable = false)
+    @Schema(description = "Short title", example = "Legacy VPN reliance")
     private String title;
 
+    @Schema(description = "Detailed description", example = "Remote access depends on end-of-life VPN appliance.")
     private String description;
 
     @Column(nullable = false)
+    @Schema(description = "Risk category", example = "Operational")
     private String category;
 
     @Column(nullable = false)
+    @Schema(description = "Likelihood score (e.g. 1–5)", example = "4")
     private Integer likelihood;
 
     @Column(nullable = false)
+    @Schema(description = "Impact score (e.g. 1–5)", example = "5")
     private Integer impact;
 
+    @Schema(description = "Treatment / lifecycle status", example = "Open")
     private String status;
 
     @Column(name = "due_date")
+    @Schema(description = "Review or treatment due date", example = "2026-06-30")
     private LocalDate dueDate;
 
     @Column(name = "ai_description")
+    @Schema(description = "Optional AI-generated summary", example = "VPN hardware is past vendor support.")
     private String aiDescription;
 
     @Column(name = "is_deleted")
+    @Schema(description = "Soft-delete flag (managed by the application)", example = "false", accessMode = Schema.AccessMode.READ_ONLY)
     private Boolean deleted = false;
 
     @Column(name = "deleted_at")
+    @Schema(description = "When the risk was soft-deleted", accessMode = Schema.AccessMode.READ_ONLY)
     private LocalDateTime deletedAt;
 
     @Column(name = "created_at")
+    @Schema(description = "Creation timestamp", accessMode = Schema.AccessMode.READ_ONLY)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
+    @Schema(description = "Last update timestamp", accessMode = Schema.AccessMode.READ_ONLY)
     private LocalDateTime updatedAt;
 
     @PrePersist

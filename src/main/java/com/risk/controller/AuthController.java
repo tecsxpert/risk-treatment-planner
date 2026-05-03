@@ -1,19 +1,27 @@
 package com.risk.controller;
 
 import com.risk.dto.AuthRequest;
+import com.risk.dto.TokenResponse;
 import com.risk.entity.User;
 import com.risk.repository.UserRepository;
 import com.risk.security.JwtUtil;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Authentication", description = "Register, login, and refresh JWT tokens")
 public class AuthController {
 
     @Autowired
@@ -25,11 +33,18 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // ✅ REGISTER
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody AuthRequest request) {
+    @Operation(summary = "Register a new user", description = "Creates a user with role VIEWER. Fails if the username is already taken.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User created",
+                    content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE,
+                            schema = @Schema(implementation = String.class, example = "User registered successfully"))),
+            @ApiResponse(responseCode = "400", description = "Username already exists",
+                    content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE,
+                            schema = @Schema(implementation = String.class, example = "User already exists")))
+    })
+    public ResponseEntity<String> register(@RequestBody AuthRequest request) {
 
-        // check if user already exists
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             return ResponseEntity.badRequest().body("User already exists");
         }
@@ -44,8 +59,18 @@ public class AuthController {
         return ResponseEntity.ok("User registered successfully");
     }
 
-    // ✅ LOGIN
     @PostMapping("/login")
+    @Operation(summary = "Login", description = "Returns a JWT for the given credentials.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "JWT issued",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TokenResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Invalid password",
+                    content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE,
+                            schema = @Schema(implementation = String.class, example = "Invalid password"))),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE,
+                            schema = @Schema(implementation = String.class, example = "User not found")))
+    })
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
 
         User user = userRepository.findByUsername(request.getUsername()).orElse(null);
@@ -59,12 +84,21 @@ public class AuthController {
 
         String token = jwtUtil.generateToken(user.getUsername(), user.getRole());
 
-        return ResponseEntity.ok(Map.of("token", token));
+        return ResponseEntity.ok(new TokenResponse(token));
     }
 
-    // ✅ REFRESH TOKEN
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(@RequestHeader("Authorization") String header) {
+    @Operation(summary = "Refresh token", description = "Issues a new JWT from an existing Bearer token (role reset to VIEWER in current implementation).")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "New JWT issued",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TokenResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Missing or invalid Authorization header",
+                    content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE,
+                            schema = @Schema(implementation = String.class, example = "Invalid token")))
+    })
+    public ResponseEntity<?> refresh(
+            @Parameter(description = "Bearer access token", required = true, example = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
+            @RequestHeader("Authorization") String header) {
 
         if (header == null || !header.startsWith("Bearer ")) {
             return ResponseEntity.status(400).body("Invalid token");
@@ -75,6 +109,6 @@ public class AuthController {
 
         String newToken = jwtUtil.generateToken(username, "VIEWER");
 
-        return ResponseEntity.ok(Map.of("token", newToken));
+        return ResponseEntity.ok(new TokenResponse(newToken));
     }
 }
