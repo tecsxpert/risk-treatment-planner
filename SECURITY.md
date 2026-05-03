@@ -123,3 +123,22 @@ Checked the codebase to make sure no personal data (PII) is being leaked or acci
 
 ### 3. Conclusion
 The API is now hardened against PII leaks. No personal data is being logged to the console or stored on the server.
+
+---
+
+## Week 2: Security Sign-off
+
+I am officially signing off on the Week 2 security requirements for the Risk Treatment Planner AI Service. All core hardening tasks have been implemented and verified.
+
+### 1. Security Controls Verified:
+*   **JWT Enforcement:** Backend is configured to support token-based authorization.
+*   **Rate Limiting:** `flask-limiter` is active and successfully restricting request spikes to prevent DDoS.
+*   **Injection Rejection:** Middleware is blocking both SQL injection and AI prompt injection patterns.
+*   **Header Hardening:** Verified that X-Frame-Options, X-Content-Type-Options, and CSP headers are live.
+*   **PII Privacy:** Completed a manual audit and added an email filter to prevent personal data leaks.
+
+### 2. Final Status
+The API is currently hardened against common web vulnerabilities and ready for production-level AI integration.
+
+**Date:** 2026-05-04  
+**Status:** **SECURE & SIGNED-OFF**
