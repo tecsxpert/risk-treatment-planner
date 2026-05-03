@@ -140,5 +140,26 @@ I am officially signing off on the Week 2 security requirements for the Risk Tre
 ### 2. Final Status
 The API is currently hardened against common web vulnerabilities and ready for production-level AI integration.
 
-**Date:** 2026-05-04  
 **Status:** **SECURE & SIGNED-OFF**
+
+---
+
+## Day 11: Full Active Scan Results
+
+I performed a full OWASP ZAP Active Scan using the Default Policy to stress-test the API against automated attacks.
+
+### 1. Scan Summary
+*   **Target:** http://127.0.0.1:5000
+*   **Critical Findings:** 0
+*   **High Findings:** 0
+*   **Medium Findings:** 0
+*   **Low/Info Findings:** 0
+
+### 2. Verification
+The zero-alert result confirms that the following protections are working:
+*   **Injection Rejection:** Middleware successfully blocked all SQL and Prompt injection payloads.
+*   **Header Hardening:** Anti-clickjacking and sniffing headers (CSP, X-Frame) are active and verified.
+*   **Information Leakage:** Server masking prevented ZAP from identifying the backend version.
+
+### 3. Final Conclusion
+The AI Service has passed the active vulnerability assessment. No high or medium-risk issues were found.
