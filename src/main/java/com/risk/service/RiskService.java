@@ -29,6 +29,11 @@ public class RiskService {
             risk.setTitle(updatedRisk.getTitle());
             risk.setDescription(updatedRisk.getDescription());
             risk.setStatus(updatedRisk.getStatus());
+            risk.setCategory(updatedRisk.getCategory());
+            risk.setLikelihood(updatedRisk.getLikelihood());
+            risk.setImpact(updatedRisk.getImpact());
+            risk.setDueDate(updatedRisk.getDueDate());
+            risk.setAiDescription(updatedRisk.getAiDescription());
             return riskRepository.save(risk);
         });
     }

@@ -88,13 +88,16 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    @Operation(summary = "Refresh token", description = "Issues a new JWT from an existing Bearer token (role reset to VIEWER in current implementation).")
+    @Operation(summary = "Refresh token", description = "Issues a new JWT using the current user's role from the database (token subject must still be valid).")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "New JWT issued",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TokenResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Missing or invalid Authorization header",
+            @ApiResponse(responseCode = "400", description = "Missing or invalid Authorization header or JWT",
                     content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE,
-                            schema = @Schema(implementation = String.class, example = "Invalid token")))
+                            schema = @Schema(implementation = String.class, example = "Invalid token"))),
+            @ApiResponse(responseCode = "404", description = "User no longer exists",
+                    content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE,
+                            schema = @Schema(implementation = String.class, example = "User not found")))
     })
     public ResponseEntity<?> refresh(
             @Parameter(description = "Bearer access token", required = true, example = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
@@ -105,9 +108,17 @@ public class AuthController {
         }
 
         String token = header.substring(7);
-        String username = jwtUtil.extractUsername(token);
+        if (!jwtUtil.isTokenValid(token)) {
+            return ResponseEntity.status(400).body("Invalid token");
+        }
 
-        String newToken = jwtUtil.generateToken(username, "VIEWER");
+        String username = jwtUtil.extractUsername(token);
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(404).body("User not found");
+        }
+
+        String newToken = jwtUtil.generateToken(user.getUsername(), user.getRole());
 
         return ResponseEntity.ok(new TokenResponse(newToken));
     }

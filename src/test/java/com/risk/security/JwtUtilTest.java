@@ -1,10 +1,18 @@
 package com.risk.security;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@ActiveProfiles("test")
 public class JwtUtilTest {
-    private final JwtUtil jwtUtil = new JwtUtil();
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Test
     void testGenerateAndExtract() {
