@@ -126,7 +126,7 @@ The API is now hardened against PII leaks. No personal data is being logged to t
 
 ---
 
-## Week 2: Security Sign-off
+## Day 10: Week 2 Security Sign-off
 
 I am officially signing off on the Week 2 security requirements for the Risk Treatment Planner AI Service. All core hardening tasks have been implemented and verified.
 
