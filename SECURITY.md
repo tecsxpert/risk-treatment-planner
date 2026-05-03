@@ -105,3 +105,21 @@ I added a custom `Server` header in the code to overwrite the default Flask one.
 
 ### 3. Conclusion
 The API is now much more hardened. The main risks like Clickjacking and basic Script Injection are blocked, and the server information is hidden.
+
+---
+
+## Day 9: PII Audit & Data Privacy
+
+Checked the codebase to make sure no personal data (PII) is being leaked or accidentally stored.
+
+### 1. Audit Findings
+*   **Logs:** Verified `app.py` and `middleware.py` are clean. No `print(request.json)` or logging calls are capturing user-provided text.
+*   **Data Handling:** Confirmed that user input stays in memory during sanitization and isn't saved to any local files or databases.
+*   **API Safety:** Checked that data sent to routes is stripped of HTML and sketchy patterns before any processing happens.
+
+### 2. Changes Made
+*   **Added PII Filter:** Updated `middleware.py` with a regex pattern to detect and block email addresses. This stops users from accidentally sending contact info through the API.
+*   **Privacy Block:** If the system finds an email, it now returns a "Privacy Blocked" error instead of processing the request.
+
+### 3. Conclusion
+The API is now hardened against PII leaks. No personal data is being logged to the console or stored on the server.

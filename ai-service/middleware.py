@@ -1,4 +1,5 @@
 import bleach
+import re  # New import for PII detection
 from flask import request, jsonify
 
 # list of sketchy phrases people use to jailbreak AI
@@ -12,7 +13,7 @@ BAD_PHRASES = [
     "bypass"
 ]
 
-# list of common sql injection patterns (Day 5 Fix)
+# list of common sql injection patterns
 SQL_PATTERNS = [
     "select *", 
     "insert into", 
@@ -22,6 +23,9 @@ SQL_PATTERNS = [
     "'='1", 
     "\"=\"1"
 ]
+
+# Simple Regex for detecting email addresses (Common PII)
+EMAIL_PATTERN = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
 
 def sanitize_input():
     # we only care about POST requests since they carry data
@@ -34,21 +38,29 @@ def sanitize_input():
         if not data:
             return jsonify({"error": "Bad Request", "message": "Request body cannot be empty."}), 400
             
-        # grab the user input (it might be under 'text' or 'description')
+        # grab the user input
         user_text = data.get('text', '') or data.get('description', '')
         
-        # 1. FIX: Check for empty input (Test 1)
+        # 1. Check for empty input
         if not user_text or str(user_text).strip() == "":
             return jsonify({
                 "error": "Bad Request", 
                 "message": "Input text cannot be empty."
             }), 400
+
+        # --- DAY 9: PII AUDIT CHECK ---
+        # If an email is detected, we block it to prevent personal data from hitting logs or AI prompts
+        if re.search(EMAIL_PATTERN, str(user_text)):
+            return jsonify({
+                "error": "Privacy Blocked",
+                "message": "Personally Identifiable Information (email) detected. Please remove personal data."
+            }), 400
             
-        # 2. strip html tags so they can't do XSS attacks
+        # 2. strip html tags for XSS protection
         clean_text = bleach.clean(str(user_text), tags=[], strip=True)
         text_lower = clean_text.lower()
         
-        # 3. FIX: Check for SQL Injection (Test 2)
+        # 3. Check for SQL Injection
         for pattern in SQL_PATTERNS:
             if pattern in text_lower:
                 return jsonify({
@@ -56,7 +68,7 @@ def sanitize_input():
                     "message": "Potential SQL injection detected. Request denied."
                 }), 400
 
-        # 4. Check for prompt injection (Test 3)
+        # 4. Check for prompt injection
         for phrase in BAD_PHRASES:
             if phrase in text_lower:
                 return jsonify({
