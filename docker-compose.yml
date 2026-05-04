@@ -17,9 +17,10 @@ services:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   # 2. Redis Cache Service
   risk-redis:
@@ -29,9 +30,10 @@ services:
       - "${REDIS_PORT}:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   # 3. PgAdmin (Database Viewer UI)
   pgadmin:
@@ -52,6 +54,7 @@ services:
       interval: 15s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   # 4. Spring Boot Backend API
   risk-backend:
@@ -60,7 +63,8 @@ services:
     env_file:
       - .env
     environment:
-      # Injecting environment variables to override application.properties
+      # P3 Fix: Optimized JVM for faster startup in container environments
+      - JAVA_OPTS=-XX:+TieredCompilation -XX:TieredStopAtLevel=1
       - SPRING_DATASOURCE_URL=jdbc:postgresql://risk-postgres:5432/${POSTGRES_DB}
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
@@ -74,13 +78,13 @@ services:
       risk-redis:
         condition: service_healthy
     healthcheck:
-      # We know Swagger is active, so we ping the API docs to verify it's alive
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/v3/api-docs || exit 1"]
-      interval: 15s
-      timeout: 5s
+      interval: 10s
+      timeout: 10s
       retries: 5
+    restart: on-failure
 
-  # 5. Frontend Placeholder (Nginx web server until UI is built)
+  # 5. Frontend Placeholder
   risk-frontend:
     image: nginx:alpine
     container_name: risk-frontend
@@ -94,6 +98,7 @@ services:
       interval: 15s
       timeout: 5s
       retries: 3
+    restart: unless-stopped
 
 volumes:
   postgres_data:

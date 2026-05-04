@@ -1,7 +1,7 @@
 package com.risk.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -13,22 +13,32 @@ public class Risk {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Title is required")
     @Column(nullable = false)
     private String title;
 
     private String description;
 
+    @NotBlank(message = "Category is required")
     @Column(nullable = false)
     private String category;
 
+    @NotNull(message = "Likelihood is required")
+    @Min(value = 1, message = "Likelihood must be at least 1")
+    @Max(value = 5, message = "Likelihood cannot exceed 5")
     @Column(nullable = false)
     private Integer likelihood;
 
+    @NotNull(message = "Impact is required")
+    @Min(value = 1, message = "Impact must be at least 1")
+    @Max(value = 5, message = "Impact cannot exceed 5")
     @Column(nullable = false)
     private Integer impact;
 
     private String status;
 
+    // Prevents dates in the past
+    @FutureOrPresent(message = "Due date cannot be in the past")
     @Column(name = "due_date")
     private LocalDate dueDate;
 
@@ -51,7 +61,8 @@ public class Risk {
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
-        this.deleted = false;
+        this.deleted = (this.deleted != null) ? this.deleted : false;
+        if (this.status == null) this.status = "OPEN";
     }
 
     @PreUpdate
@@ -59,6 +70,7 @@ public class Risk {
         this.updatedAt = LocalDateTime.now();
     }
 
+    // Standard Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

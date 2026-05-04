@@ -21,7 +21,9 @@ public class JwtFilter extends OncePerRequestFilter {
     private JwtUtil jwtUtil;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
             throws ServletException, IOException {
 
         String path = request.getServletPath();
@@ -29,29 +31,54 @@ public class JwtFilter extends OncePerRequestFilter {
             path = request.getRequestURI();
         }
 
-        if (path.startsWith("/auth") || path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs")) {
+        // ✅ Skip authentication for public endpoints
+        if (path.startsWith("/auth") ||
+            path.startsWith("/swagger-ui") ||
+            path.startsWith("/v3/api-docs") ||
+            path.startsWith("/swagger-resources") ||
+            path.startsWith("/webjars")) {
+
             filterChain.doFilter(request, response);
             return;
         }
 
         String header = request.getHeader("Authorization");
 
+        // ✅ Check Bearer token
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
+
             try {
                 String username = jwtUtil.extractUsername(token);
                 String role = jwtUtil.extractRole(token);
 
-                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null && jwtUtil.isTokenValid(token)) {
-                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                            username, null, List.of(new SimpleGrantedAuthority("ROLE_" + role))
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(auth);
+                // ✅ Validate token & ensure no existing authentication
+                if (username != null &&
+                    SecurityContextHolder.getContext().getAuthentication() == null &&
+                    jwtUtil.isTokenValid(token)) {
+
+                    // ✅ Ensure ROLE_ prefix (Spring requirement)
+                    String finalRole = role.startsWith("ROLE_")
+                            ? role
+                            : "ROLE_" + role;
+
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    username,
+                                    null,
+                                    List.of(new SimpleGrantedAuthority(finalRole))
+                            );
+
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
+
             } catch (Exception e) {
+                // ⚠️ Log error (do not break request flow)
                 System.out.println("JWT Error: " + e.getMessage());
             }
         }
+
+        // ✅ Continue filter chain
         filterChain.doFilter(request, response);
     }
 }
