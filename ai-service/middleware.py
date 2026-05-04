@@ -38,12 +38,11 @@ def sanitize_input():
         if not data:
             return jsonify({"error": "Bad Request", "message": "Request body cannot be empty."}), 400
             
-        # 2. Grab the user input (Updated to include the 'input' key used in Postman)
+        # 2. Grab the user input
         # This checks 'input', 'text', or 'description' in that order.
         user_text = data.get('input') or data.get('text') or data.get('description') or ""
         
         # 3. Check for empty input specifically for the /describe route
-        # We allow empty text for other routes to ensure Auth/401 checks can trigger
         if request.path == '/describe' and not str(user_text).strip():
             return jsonify({
                 "error": "Bad Request", 
@@ -57,8 +56,17 @@ def sanitize_input():
                 "message": "Personally Identifiable Information (email) detected."
             }), 400
             
-        # 4. XSS Protection: Strip HTML tags
-        clean_text = bleach.clean(str(user_text), tags=[], strip=True)
+        # 4. XSS PROTECTION: DETECT & BLOCK (Updated for Day 20 Demo)
+        # We strip all tags and compare. If the text changed, it contained malicious HTML/Scripts.
+        original_text = str(user_text)
+        clean_text = bleach.clean(original_text, tags=[], strip=True)
+        
+        if clean_text != original_text:
+            return jsonify({
+                "error": "Security Blocked",
+                "message": "Malicious content (HTML/Script) detected in input."
+            }), 400
+            
         text_lower = clean_text.lower()
         
         # 5. Check for SQL Injection
