@@ -1,0 +1,6 @@
+# Day 16: Security Talking Points for Demo Day
+
+* **JWT & Authentication:** For access control, we used Spring Security and JWT to handle Role-Based Access Control. In the demo, I’ll show you that if we try to call an API without a valid token, the system correctly blocks it with a 401 Unauthorized error.
+* **Rate Limiting:** To stop the API from being overwhelmed, I set up flask-limiter. Most endpoints allow 30 requests per minute, but for the AI report generation, we restricted it to 10 per minute to keep things stable. If someone crosses this limit, they’ll get a 429 code.
+* **Input Sanitisation:** I built a custom middleware that uses the bleach library to scrub all incoming JSON data. It’s designed to strip out malicious HTML and catch prompt injection patterns.If we try to inject a script during the demo, you’ll see the system reject it with a 400 Bad Request.
+* **OWASP ZAP Results:** We didn’t just guess the security was working—we ran full OWASP ZAP baseline and active scans.I went through the report and fixed all the findings, so we’re presenting this today with zero Critical or High-severity vulnerabilities in the final SECURITY.md.
