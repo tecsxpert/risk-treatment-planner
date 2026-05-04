@@ -5,8 +5,9 @@ COPY pom.xml .
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Run stage: runs the compiled app
+# Run stage: runs the compiled app (wget = docker-compose healthcheck)
 FROM eclipse-temurin:17-jre-alpine
+RUN apk add --no-cache wget
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080

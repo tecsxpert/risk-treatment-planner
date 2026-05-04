@@ -5,6 +5,10 @@ import com.internship.tool.repository.ExampleEntityRepository;
 import com.internship.tool.exception.EntityNotFoundException;
 import com.internship.tool.exception.InvalidInputException;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.internship.tool.service.email.EmailService;
+import jakarta.mail.MessagingException;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,10 +21,12 @@ import java.util.Optional;
 @Service
 public class ExampleEntityService {
     private final ExampleEntityRepository repository;
+    private final EmailService emailService;
 
     @Autowired
-    public ExampleEntityService(ExampleEntityRepository repository) {
+    public ExampleEntityService(ExampleEntityRepository repository, EmailService emailService) {
         this.repository = repository;
+        this.emailService = emailService;
     }
 
 
@@ -47,7 +53,18 @@ public class ExampleEntityService {
     @CacheEvict(value = {"exampleEntities", "exampleEntitiesAll", "exampleEntity"}, allEntries = true)
     public ExampleEntity create(ExampleEntity entity) {
         validate(entity);
-        return repository.save(entity);
+        ExampleEntity saved = repository.save(entity);
+        // Send email notification on create
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("name", saved.getName());
+        variables.put("description", saved.getDescription());
+        variables.put("date", saved.getCreatedDate());
+        try {
+            emailService.sendHtmlMessage("recipient@example.com", "Entity Created", "email/created", variables);
+        } catch (MessagingException e) {
+            // Log error
+        }
+        return saved;
     }
 
 
