@@ -248,52 +248,46 @@ The following threats were identified and addressed during the security sprint:
 
 ---
 
-## DAY 15
-# Final Security Assessment & Sign-Off: Risk Treatment Planner
+# Final Security Assessment: Tool-03 Risk Treatment Planner
 
 ## 1. Executive Summary
-The Risk Treatment Planner API has completed a comprehensive 9-day security hardening sprint (Days 7-15). The project transitioned from a baseline development state to a production-ready "Hardened" state by implementing automated security header management, multi-layer input sanitization, and Role-Based Access Control (RBAC). As of Day 15, all critical and high-risk vulnerabilities identified by automated scans and manual audits have been remediated.
+The Risk Treatment Planner API has completed a comprehensive security hardening phase (Days 7–15). The project has transitioned from a baseline development state to a production-ready "Hardened" posture by implementing automated security headers via `flask-talisman`, multi-layer input sanitization, and Role-Based Access Control (RBAC). As of Day 18, all critical and high-risk vulnerabilities have been remediated.
 
-## 2. Threat Landscape
-The following threats were identified and successfully mitigated during the security sprint:
-* **Injection Attacks:** Prevented XSS (Cross-Site Scripting) and SQL Injection via middleware sanitization.
-* **Broken Authentication:** Blocked unauthorized access to restricted endpoints using token-based verification.
-* **Exposure of PII:** Implemented regex filters to prevent the logging or processing of personally identifiable information (emails).
-* **Resource Exhaustion:** Protected AI services from API abuse and DDoS attempts via rate limiting.
-* **Information Leakage:** Masked server version and technical stack signatures from HTTP headers.
+## 2. Threat Model & Landscape
+The following risks were identified and successfully mitigated[cite: 1]:
+* **Injection Attacks:** Prevented XSS, SQL Injection, and AI Prompt Injection through `bleach` and custom middleware[cite: 1].
+* **Broken Authentication:** Secured sensitive routes (e.g., `/generate-report`) using JWT and role-based decorators[cite: 1].
+* **PII Exposure:** Implemented regex-based filters to block the processing of email addresses and sensitive contact data[cite: 1].
+* **Resource Exhaustion:** Protected AI services from DDoS and API abuse using `flask-limiter`[cite: 1].
+* **Information Leakage:** Masked server signatures (Flask/Werkzeug) to prevent technology fingerprinting[cite: 1].
 
-## 3. Final Security Checklist
-- [x] **Automated Scanning:** OWASP ZAP Active Scan completed with 0 Critical/High alerts.
-- [x] **Security Headers:** HSTS, CSP, and XSS protection implemented via `flask-talisman`.
-- [x] **Information Masking:** Server fingerprinting disabled via `CustomRequestHandler`.
-- [x] **PII Protection:** Regex-based email filtering active to prevent data leakage.
-- [x] **Input Hardening:** All JSON payloads sanitized using `bleach` to block malicious scripts.
-- [x] **Access Control:** Verified 401 (Unauthorized) and 403 (Forbidden) response codes.
-- [x] **Traffic Control:** API Rate Limiting (429 Too Many Requests) verified and active.
+## 3. Tests Conducted & Verification
+- **Automated Scans:** Full OWASP ZAP Active Scans completed with 0 Critical/High alerts[cite: 1].
+- **Manual Audits:** Verified 401 (Unauthorized), 403 (Forbidden), and 429 (Rate Limit) response codes via Postman[cite: 1].
+- **Sanitization Testing:** Confirmed successful rejection of script injection and SQL injection payloads[cite: 1].
 
 ## 4. Findings & Remediations
 | Finding | Status | Fix Implemented |
 | :--- | :--- | :--- |
-| Missing Security Headers | FIXED | Integrated `flask-talisman` middleware. |
-| PII Leakage | FIXED | Implemented PII regex audit filter in `middleware.py`. |
-| Broken Auth | FIXED | Developed `@require_auth` decorator with role-checks. |
-| API Abuse | FIXED | Configured `flask-limiter` (5 requests/min). |
-| XSS/Injection | FIXED | Sanitization middleware active on all POST routes. |
+| Missing Security Headers | FIXED | Integrated `flask-talisman` for CSP, HSTS, and XSS protection[cite: 1]. |
+| PII Leakage | FIXED | Implemented PII regex audit filter in `middleware.py`[cite: 1]. |
+| Broken Auth | FIXED | Developed `@require_auth` decorator with role-based checks[cite: 1]. |
+| API Abuse | FIXED | Configured `flask-limiter` (30 req/min default; 10 req/min for reports)[cite: 1]. |
+| Server Fingerprinting | FIXED | Masked server signatures using `CustomRequestHandler`[cite: 1]. |
 
 ## 5. Residual Risks
-* **Dependency Vulnerabilities:** Risks from third-party libraries are mitigated through regular package updates.
-* **Client-Side Storage:** Security of the front-end token storage remains outside the scope of this backend audit.
+* **Dependency Vulnerabilities:** Risks from third-party libraries are mitigated through version pinning and regular updates[cite: 1].
+* **Client-Side Storage:** Security of front-end token storage is recognized as a known risk for the UI implementation[cite: 1].
 
 ## 6. Official Team Sign-off
-We, the undersigned, certify that the Risk Treatment Planner has passed all internal security audits and is ready for production deployment.
+We, the undersigned, certify that the Risk Treatment Planner has passed all internal security audits and is ready for production deployment[cite: 1].
 
-* **AI Developer 3:** Akhil M
+* **AI Developer 3:** Akhil M (DBIT, CSE-AIML)
 * **AI Developer 2:** Aditya Pandey
 * **AI Developer 1:** AQSA ANJUM TABREZ KHAN
 * **Java Developer 3:** Amit Parashuram Nalatawad
 * **Java Developer 2:** Keerthana Y N
-* **Java Developer 1:** DARSHAN D S
+* **Java Developer 1:** DARSHANA D S
 * **Security Reviewer:** Harsha Vardhana S
 
 **Final Status:** SECURITY VERIFIED & PROJECT CLOSED
-**Date:** May 5, 2026
