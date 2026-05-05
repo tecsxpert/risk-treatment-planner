@@ -121,5 +121,24 @@ be updated before Demo Day (9 May 2026).
 - [ ] All team members signed off — pending Demo Day
 
 ---
+---
 
+## Independent Security Review — Harsha Vardhana S
+**Role:** Security Reviewer  
+**Date:** 5 May 2026
+
+### Review Summary
+I have independently reviewed the security controls documented above
+and verified the following through static code analysis of pull requests:
+
+- JWT authentication enforced on all non-public endpoints 
+- No secrets or .env files committed to the repository 
+- Generic error responses confirmed — no stack traces exposed 
+- Rate limiting configured correctly per project spec 
+- Input sanitisation middleware present in AI service 
+
+### Reviewer Sign-off
+**Harsha Vardhana S — Security Reviewer**  
+**Status: REVIEWED **  
+**Date: 5 May 2026**
 *Risk Treatment Planner — Capstone Security Review | Sprint: 14 April – 9 May 2026*
